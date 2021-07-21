@@ -400,6 +400,8 @@ static S3Status compose_amz_headers(const RequestParams *params,
     // Capture the date for possible use in StringToSign
     if (params->bucketContext.stsDate != S3STSAmzOnly) {
         snprintf(values->dateHeader, sizeof(values->dateHeader),"Date: %s", values->requestDateISO8601);
+    } else {
+        values->dateHeader[0] = 0;
     }
 
     if (params->httpRequestType == HttpRequestTypeCOPY) {

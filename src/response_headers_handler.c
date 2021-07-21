@@ -49,6 +49,8 @@ void response_headers_handler_initialize(ResponseHeadersHandler *handler)
     handler->responseProperties.metaData = 0;
     handler->responseProperties.usesServerSideEncryption = 0;
     handler->done = 0;
+    handler->responseProperties.xAmzStorageClass = 0;
+    handler->responseProperties.xAmzRestore = 0;
     string_multibuffer_initialize(handler->responsePropertyStrings);
     string_multibuffer_initialize(handler->responseMetaDataStrings);
 }
@@ -59,7 +61,7 @@ void response_headers_handler_add(ResponseHeadersHandler *handler,
 {
     S3ResponseProperties *responseProperties = &(handler->responseProperties);
     char *end = &(header[len]);
-    
+
     // Curl might call back the header function after the body has been
     // received, for 'chunked encoded' contents.  We don't handle this as of
     // yet, and it's not clear that it would ever be useful.
@@ -130,6 +132,18 @@ void response_headers_handler_add(ResponseHeadersHandler *handler,
         responseProperties->requestId2 = 
             string_multibuffer_current(handler->responsePropertyStrings);
         string_multibuffer_add(handler->responsePropertyStrings, c, 
+                               valuelen, fit);
+    }
+    else if (!strncasecmp(header, "x-amz-storage-class", namelen)) {
+        responseProperties->xAmzStorageClass =
+            string_multibuffer_current(handler->responsePropertyStrings);
+        string_multibuffer_add(handler->responsePropertyStrings, c,
+                               valuelen, fit);
+    }
+    else if (!strncasecmp(header, "x-amz-restore", namelen)) {
+        responseProperties->xAmzRestore =
+            string_multibuffer_current(handler->responsePropertyStrings);
+        string_multibuffer_add(handler->responsePropertyStrings, c,
                                valuelen, fit);
     }
     else if (!strncasecmp(header, "Content-Type", namelen)) {

@@ -407,3 +407,109 @@ void S3_delete_object(const S3BucketContext *bucketContext, const char *key,
     // Perform the request
     request_perform(&params, requestContext);
 }
+
+
+// restore object --------------------------------------------------------------
+
+typedef struct RestoreObjectData {
+    SimpleXml simplexml;
+    void *userdata;
+    S3RestoreObjectHandler *handler;
+
+    string_buffer(location,128);
+} RestoreObjectData;
+
+static S3Status restoreObjectCallback(int bufferSize, const char *buffer,
+                                        void *callbackData)
+{
+    RestoreObjectData *data = (RestoreObjectData *) callbackData;
+    return simplexml_add(&(data->simplexml), buffer, bufferSize);
+}
+
+
+static S3Status restoreObjectPropertiesCallback
+    (const S3ResponseProperties *responseProperties, void *callbackData)
+{
+    RestoreObjectData *data = (RestoreObjectData *) callbackData;
+
+    if (data->handler->responseHandler.propertiesCallback) {
+        (*(data->handler->responseHandler.propertiesCallback))
+            (responseProperties, data->userdata);
+    }
+    return S3StatusOK;
+}
+
+static void restoreObjectCompleteCallback
+    (S3Status requestStatus, const S3ErrorDetails *s3ErrorDetails,
+     void *callbackData)
+{
+    RestoreObjectData *data = (RestoreObjectData*) callbackData;
+    if (data->handler->responseHandler.completeCallback) {
+        (*(data->handler->responseHandler.completeCallback))
+            (requestStatus, s3ErrorDetails, data->userdata);
+    }
+    simplexml_deinitialize(&(data->simplexml));
+    free(data);
+}
+
+static int restoreObjectPutCallback(int bufferSize, char *buffer,
+                                    void *callbackData)
+{
+    RestoreObjectData *data = (RestoreObjectData*) callbackData;
+    if (data->handler->putObjectDataCallback) {
+        return data->handler->putObjectDataCallback(bufferSize, buffer,
+                                                    data->userdata);
+    }
+    else {
+        return -1;
+    }
+}
+
+void S3_restore_object(S3BucketContext *bucketContext,
+                                  const char *key,
+                                  S3RestoreObjectHandler *handler,
+                                  int contentLength,
+                                  S3RequestContext *requestContext,
+                                  int timeoutMs,
+                                  void *callbackData)
+{
+    RestoreObjectData *data =
+        (RestoreObjectData*) malloc(sizeof(RestoreObjectData));
+    data->userdata = callbackData;
+    data->handler = handler;
+
+    simplexml_initialize(&(data->simplexml),
+                         NULL, data);
+
+    RequestParams params =
+    {
+        HttpRequestTypePOST,                          // httpRequestType
+        { bucketContext->hostName,                    // hostName
+          bucketContext->bucketName,                  // bucketName
+          bucketContext->protocol,                    // protocol
+          bucketContext->uriStyle,                    // uriStyle
+          bucketContext->accessKeyId,                 // accessKeyId
+          bucketContext->secretAccessKey,             // secretAccessKey
+          bucketContext->securityToken,               // securityToken
+          bucketContext->authRegion,                  // authRegion
+          bucketContext->stsDate },                   // stsDate
+        key,                                          // key
+        0,                                            // queryParams
+        "restore",                                    // subResource
+        0,                                            // copySourceBucketName
+        0,                                            // copySourceKey
+        0,                                            // getConditions
+        0,                                            // startByte
+        0,                                            // byteCount
+        0,                                            // putProperties
+        restoreObjectPropertiesCallback,              // propertiesCallback
+        restoreObjectPutCallback,                     // toS3Callback
+        contentLength,                                // toS3CallbackTotalSize
+        restoreObjectCallback,                        // fromS3Callback
+        restoreObjectCompleteCallback,                // completeCallback
+        data,                                         // callbackData
+        timeoutMs                                     // timeoutMs
+    };
+
+    request_perform(&params, requestContext);
+}

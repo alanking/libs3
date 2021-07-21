@@ -640,6 +640,19 @@ typedef struct S3ResponseProperties
      * encryption is in effect for the object.
      **/
     char usesServerSideEncryption;
+
+    /**
+     * This optional field is returned when the x-amz-storage-class header
+     * is returned (for HEAD request).
+     **/
+    const char *xAmzStorageClass;
+
+    /**
+     * This optional field is returned when the x-amz-restore header
+     * is returned (for HEAD request).
+     **/
+    const char *xAmzRestore;
+
 } S3ResponseProperties;
 
 
@@ -1429,6 +1442,22 @@ typedef struct S3MultipartCommitHandler
     S3PutObjectDataCallback *putObjectDataCallback;
     S3MultipartCommitResponseCallback *responseXmlCallback;
 } S3MultipartCommitHandler;
+
+typedef struct S3RestoreObjectHandler
+{
+    /**
+     * responseHandler provides the properties and complete callback
+     **/
+    S3ResponseHandler responseHandler;
+
+    /**
+     * The putObjectDataCallback is called to acquire the restore XML data to send to S3 as
+     * the contents of the restore_object request.  It is made repeatedly until it
+     * returns a negative number (indicating that the request should be
+     * aborted), or 0 (indicating that all data has been supplied).
+     **/
+    S3PutObjectDataCallback *putObjectDataCallback;
+} S3RestoreObjectHandler;
 
 typedef struct S3ListMultipartUploadsHandler
 {
@@ -2551,6 +2580,31 @@ void S3_complete_multipart_upload(S3BucketContext *bucketContext,
                                   int timeoutMs,
                                   void *callbackData);
 
+
+/**
+ * This operation schedules a restoration for Glacier archive.
+ *
+ * @param bucketContext gives the bucket and associated parameters for this
+ *        request; this is the bucket for which service access logging is
+ *        being set
+ * @param key is the source key
+ * @param handler gives the callbacks to call as the request is processed and
+ *        completed
+ * @param contentLength gives the total size of the commit message, in bytes
+ * @param requestContext if non-NULL, gives the S3RequestContext to add this
+ *        request to, and does not perform the request immediately.  If NULL,
+ *        performs the request immediately and synchronously.
+ * @param timeoutMs if not 0 contains total request timeout in milliseconds
+ * @param callbackData will be passed in as the callbackData parameter to
+ *        all callbacks for this request
+ **/
+void S3_restore_object(S3BucketContext *bucketContext,
+                                  const char *key,
+                                  S3RestoreObjectHandler *handler,
+                                  int contentLength,
+                                  S3RequestContext *requestContext,
+                                  int timeoutMs,
+                                  void *callbackData);
 
 /**
  * This operation lists the parts that have been uploaded for a specific
