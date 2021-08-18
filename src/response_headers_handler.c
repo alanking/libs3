@@ -134,13 +134,13 @@ void response_headers_handler_add(ResponseHeadersHandler *handler,
         string_multibuffer_add(handler->responsePropertyStrings, c, 
                                valuelen, fit);
     }
-    else if (!strncasecmp(header, "x-amz-storage-class", namelen)) {
+    else if (!strncasecmp(header, "x-amz-storage-class", namelen) || !strncasecmp(header, "x-goog-storage-class", namelen)) {
         responseProperties->xAmzStorageClass =
             string_multibuffer_current(handler->responsePropertyStrings);
         string_multibuffer_add(handler->responsePropertyStrings, c,
                                valuelen, fit);
     }
-    else if (!strncasecmp(header, "x-amz-restore", namelen)) {
+    else if (!strncasecmp(header, "x-amz-restore", namelen) || !strncasecmp(header, "x-goog-restore", namelen)) {
         responseProperties->xAmzRestore =
             string_multibuffer_current(handler->responsePropertyStrings);
         string_multibuffer_add(handler->responsePropertyStrings, c,
