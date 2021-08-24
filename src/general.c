@@ -489,6 +489,8 @@ int S3_status_is_retryable(S3Status status)
     case S3StatusErrorInternalError:
     case S3StatusErrorOperationAborted:
     case S3StatusErrorRequestTimeout:
+    case S3StatusErrorQuotaExceeded:
+    case S3StatusErrorSlowDown:
         return 1;
     default:
         return 0;
