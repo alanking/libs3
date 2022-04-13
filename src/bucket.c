@@ -292,7 +292,8 @@ void S3_create_bucket(S3Protocol protocol, S3STSDate stsDate,
         cannedAcl,                               // cannedAcl
         0,                                       // metaDataCount
         0,                                       // metaData
-        0                                        // useServerSideEncryption
+        0,                                       // useServerSideEncryption
+        0                                        // xAmzStorageClass
     };
 
     // Set up the RequestParams

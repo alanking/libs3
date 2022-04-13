@@ -2413,7 +2413,8 @@ static void put_object(int argc, char **argv, int optindex,
         cannedAcl,
         metaPropertiesCount,
         metaProperties,
-        useServerSideEncryption
+        useServerSideEncryption,
+        0                         // xAmzStorageClass
     };
 
     if (contentLength <= MULTIPART_CHUNK_SIZE) {
@@ -2837,7 +2838,8 @@ static void copy_object(int argc, char **argv, int optindex)
         cannedAcl,
         metaPropertiesCount,
         metaProperties,
-        useServerSideEncryption
+        useServerSideEncryption,
+        0                         // xAmzStorageClass
     };
 
     S3ResponseHandler responseHandler =

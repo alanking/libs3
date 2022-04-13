@@ -950,6 +950,12 @@ typedef struct S3PutProperties
      * response has the usesServerSideEncryption flag set.
      **/
     char useServerSideEncryption;
+
+    /**
+     * This optional field sets the storage class on uploads.
+     **/
+    const char *xAmzStorageClass;
+
 } S3PutProperties;
 
 

@@ -571,7 +571,8 @@ void S3_set_lifecycle(const S3BucketContext *bucketContext,
         0,                                       // cannedAcl
         0,                                       // metaDataCount
         0,                                       // metaData
-        0                                        // useServerSideEncryption
+        0,                                       // useServerSideEncryption
+        0                                        // xAmzStorageClass
     };
 
     // Set up the RequestParams

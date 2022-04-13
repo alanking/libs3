@@ -388,6 +388,11 @@ static S3Status compose_amz_headers(const RequestParams *params,
             append_amz_header(values, 0, "x-amz-server-side-encryption",
                               "AES256");
         }
+
+        if (properties->xAmzStorageClass) {
+            append_amz_header(values, 0, "x-amz-storage-class",
+                              properties->xAmzStorageClass);
+        }
     }
 
     // Add the x-amz-date header
