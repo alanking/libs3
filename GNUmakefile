@@ -142,6 +142,13 @@ ifndef CFLAGS
     endif
 endif
 
+# --------------------------------------------------------------------------
+# This library uses OpenSSL API version 1.1.x. OpenSSL 3.x deprecated and
+# even removed some API calls from this API version. This requires a compile
+# definition which specifies the API version with which the target should be
+# compatible. For more information, see:
+# https://www.openssl.org/docs/man3.0/man7/OPENSSL_API_COMPAT.html
+
 CFLAGS += -Wall -Werror -Wshadow -Wextra -Iinc \
           $(CURL_CFLAGS) $(LIBXML2_CFLAGS) \
           -DLIBS3_VER_MAJOR=\"$(LIBS3_VER_MAJOR)\" \
@@ -150,6 +157,7 @@ CFLAGS += -Wall -Werror -Wshadow -Wextra -Iinc \
           -D__STRICT_ANSI__ \
           -D_ISOC99_SOURCE \
           -D_POSIX_C_SOURCE=200112L \
+		  -DOPENSSL_API_COMPAT=10100 \
 		  -fPIC
 
 LDFLAGS = $(CURL_LIBS) $(LIBXML2_LIBS) $(OPENSSL_LIBS) -lpthread
