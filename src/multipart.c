@@ -208,7 +208,7 @@ void S3_abort_multipart_upload(S3BucketContext *bucketContext, const char *key,
 void S3_upload_part(S3BucketContext *bucketContext, const char *key,
                     S3PutProperties *putProperties,
                     S3PutObjectHandler *handler, int seq,
-                    const char *upload_id, int partContentLength,
+                    const char *upload_id, int64_t partContentLength,
                     S3RequestContext *requestContext,
                     int timeoutMs,
                     void *callbackData)
