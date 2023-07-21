@@ -1168,6 +1168,9 @@ static void printListBucketHeader(int allDetails)
     printf("\n");
 }
 
+// Define a value to indicate the number of digits in UINT64_MAX: 18446744073709551615
+// Useful for defining buffers to hold large values as strings.
+#define NUM_DIGITS_IN_UINT64_MAX 20
 
 static S3Status listBucketCallback(int isTruncated, const char *nextMarker,
                                    int contentsCount,
@@ -1222,7 +1225,9 @@ static S3Status listBucketCallback(int isTruncated, const char *nextMarker,
             time_t t = (time_t) content->lastModified;
             strftime(timebuf, sizeof(timebuf), "%Y-%m-%dT%H:%M:%SZ",
                      gmtime(&t));
-            char sizebuf[16];
+            // In order to avoid the possibility of an overflow, the buffer must be large enough to hold UINT64_MAX
+            // (20 digits), the single character digit indicating the unit (+1), and the null terminator (+1).
+            char sizebuf[NUM_DIGITS_IN_UINT64_MAX + 2];
             if (content->size < 100000) {
                 sprintf(sizebuf, "%5llu", (unsigned long long) content->size);
             }
